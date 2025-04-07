@@ -9,6 +9,12 @@
 <%@ page import="com.auth.JwtUtil" %>
 <%@ page import="jakarta.servlet.http.Cookie" %>
 <%@ page import="java.util.Optional" %>
+
+<%
+    // 콘솔 로그에 "Hello, World!" 출력
+    System.out.println("Hello, World!");
+%>
+
 <%
     String accessToken = null;
     String refreshToken = null;
@@ -17,28 +23,34 @@
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
         for (Cookie cookie : cookies) {
-            if ("access_token".equals(cookie.getName())) {
+            if ("access_token".equals(cookie.getName())) { // access_token 쿠키 값 가져오기
                 accessToken = cookie.getValue();
-            } else if ("refresh_token".equals(cookie.getName())) {
+            } else if ("refresh_token".equals(cookie.getName())) { // refresh_token 쿠키 값 가져오기
                 refreshToken = cookie.getValue();
             }
         }
     }
-
+// access_token 유효성 검사
     if (accessToken != null && JwtUtil.isValid(accessToken)) {
         isAuthenticated = true;
+        System.out.println("clear - accessToken is valid");
     } else if (refreshToken != null && JwtUtil.isValid(refreshToken)) {
         // Refresh 토큰으로 Access 토큰 재발급
         String newAccessToken = JwtUtil.reissueAccessToken(refreshToken);
         if (newAccessToken != null) {
-            Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
+            Cookie newAccessCookie = new Cookie("access_token", newAccessToken);
             newAccessCookie.setPath("/");                // 쿠키가 모든 경로에서 사용 가능하도록 설정
             newAccessCookie.setHttpOnly(true);           // JavaScript에서 쿠키를 읽을 수 없도록 설정
             newAccessCookie.setSecure(true);             // HTTPS에서만 쿠키가 전송되도록 설정
             //newAccessCookie.setSameSite("Strict");       // 타 사이트에서 쿠키 전송을 막음
             response.addCookie(newAccessCookie);         // 응답에 쿠키 추가
     isAuthenticated = true;
+    System.out.println("New access token issued");
+        }else{
+            System.out.println("accessToken or refreshToken is invalid");
         }
+    }else{
+        System.out.println("Both accessToken and refreshToken are invalid");
     }
 %>
 <html lang="ko">
