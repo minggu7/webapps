@@ -32,10 +32,12 @@
         String newAccessToken = JwtUtil.reissueAccessToken(refreshToken);
         if (newAccessToken != null) {
             Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
-            newAccessCookie.setPath("/");
-            newAccessCookie.setHttpOnly(true);
-            response.addCookie(newAccessCookie);
-            isAuthenticated = true;
+            newAccessCookie.setPath("/");                // 쿠키가 모든 경로에서 사용 가능하도록 설정
+            newAccessCookie.setHttpOnly(true);           // JavaScript에서 쿠키를 읽을 수 없도록 설정
+            newAccessCookie.setSecure(true);             // HTTPS에서만 쿠키가 전송되도록 설정
+            newAccessCookie.setSameSite("Strict");       // 타 사이트에서 쿠키 전송을 막음
+            response.addCookie(newAccessCookie);         // 응답에 쿠키 추가
+    isAuthenticated = true;
         }
     }
 %>
