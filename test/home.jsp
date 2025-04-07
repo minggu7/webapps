@@ -6,6 +6,39 @@
 --%>
 
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="com.auth.JwtUtil" %>
+<%@ page import="javax.servlet.http.Cookie" %>
+<%@ page import="java.util.Optional" %>
+<%
+    String accessToken = null;
+    String refreshToken = null;
+    boolean isAuthenticated = false;
+
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+        for (Cookie cookie : cookies) {
+            if ("accessToken".equals(cookie.getName())) {
+                accessToken = cookie.getValue();
+            } else if ("refreshToken".equals(cookie.getName())) {
+                refreshToken = cookie.getValue();
+            }
+        }
+    }
+
+    if (accessToken != null && JwtUtil.isValid(accessToken)) {
+        isAuthenticated = true;
+    } else if (refreshToken != null && JwtUtil.isValid(refreshToken)) {
+        // Refresh 토큰으로 Access 토큰 재발급
+        String newAccessToken = JwtUtil.reissueAccessToken(refreshToken);
+        if (newAccessToken != null) {
+            Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
+            newAccessCookie.setPath("/");
+            newAccessCookie.setHttpOnly(true);
+            response.addCookie(newAccessCookie);
+            isAuthenticated = true;
+        }
+    }
+%>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -41,10 +74,14 @@
             transform -translate-x-1/2 : 자기 크기의 절반만큼 왼쪽으로 이동해서 중앙 정렬
         --%>
 
-        <!-- 🔐 로그인/회원가입 메뉴 -->
+        <!-- 🔐 로그인/회원가입 or 로그아웃 메뉴 -->
         <div class="ml-auto mr-4">
-            <a href="user/login.jsp" class="text-sm text-blue-600 hover:underline mr-4">로그인</a>
-            <a href="user/register.jsp" class="text-sm text-gray-600 hover:underline">회원가입</a>
+            <% if (isAuthenticated) { %>
+                <a href="user/logout.jsp" class="text-sm text-red-600 hover:underline">로그아웃</a>
+            <% } else { %>
+                <a href="user/login.jsp" class="text-sm text-blue-600 hover:underline mr-4">로그인</a>
+                <a href="user/register.jsp" class="text-sm text-gray-600 hover:underline">회원가입</a>
+            <% } %>
         </div>
     </header>
 
@@ -85,4 +122,3 @@
 
 </body>
 </html>
-
