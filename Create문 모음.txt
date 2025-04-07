@@ -1,0 +1,33 @@
+-- MySQL 사용자 생성
+-- CREATE USER IF NOT EXISTS 'kmg2388'@'localhost' IDENTIFIED BY '2388';
+
+-- 권한 부여
+-- GRANT ALL PRIVILEGES ON jsptestdb.* TO 'kmg2388'@'localhost';
+
+-- 변경사항 적용
+-- FLUSH PRIVILEGES;
+
+-- 데이터베이스 생성 (필요시)
+-- CREATE DATABASE IF NOT EXISTS jsptestdb;
+-- USE jsptestdb;
+
+-- 사용자 테이블 생성
+-- CREATE TABLE user (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     username VARCHAR(50) NOT NULL UNIQUE,
+--     password VARCHAR(100) NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+
+-- Refresh_Token 테이블 생성
+-- CREATE TABLE refresh_token (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     username VARCHAR(255) NOT NULL,
+--     token TEXT NOT NULL,
+--     is_logged_in BOOLEAN DEFAULT TRUE,             -- 현재 로그인 상태 (true: 로그인 중, false: 로그아웃 상태)
+--     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- 토큰 생성 시간 (최초 로그인 시간)
+--     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- 마지막 활동 시간
+--     last_login DATETIME,                           -- 최종 로그인 시간
+--     logout_time DATETIME                           -- 로그아웃한 시간 (있다면 로그아웃된 상태)
+-- );
