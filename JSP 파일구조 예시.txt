@@ -1,0 +1,122 @@
+현재 server.xml 설정에서 /test 경로는 C:/Tomcat/apache-tomcat-10.1.39/webapps/test 폴더를 참조하고 있습니다. 이 설정은 Tomcat 서버가 /test 경로로 접속할 때 해당 폴더에 있는 JSP 파일이나 HTML 파일, JavaScript 파일 등 모든 리소스를 제공하게 됩니다.
+
+1. 웹 애플리케이션 구조와 파일 배치
+/test 경로는 C:/Tomcat/apache-tomcat-10.1.39/webapps/test 폴더에 있는 파일들을 참조하므로, 이 폴더에 여러 파일을 넣어야 각 파일에 접근할 수 있습니다.
+
+예시:
+
+bash
+복사
+편집
+C:/Tomcat/apache-tomcat-10.1.39/webapps/test/
+  ├── index.jsp
+  ├── about.jsp
+  ├── contact.jsp
+  ├── js/
+  │   └── main.js
+  ├── css/
+  │   └── style.css
+  └── images/
+      └── logo.png
+**index.jsp**와 같은 파일이 http://localhost:8080/test/로 접근되며, 이 파일에 다른 페이지로의 링크나 이벤트 처리 등을 추가할 수 있습니다.
+
+about.jsp, contact.jsp 등의 다른 페이지로 이동할 수 있도록 링크를 만들어서, 각 페이지로 이동하는 동작을 처리할 수 있습니다.
+
+2. JSP 파일에서 jQuery와 이벤트 처리
+각 JSP 파일에서 jQuery를 사용할 수 있습니다. 예를 들어, index.jsp에서 jQuery로 다른 페이지로 이동하는 버튼을 추가하거나, AJAX를 통해 서버와 데이터를 주고받을 수 있습니다.
+
+예시: index.jsp에서 jQuery 사용하기
+
+jsp
+복사
+편집
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#aboutButton').click(function() {
+                window.location.href = 'about.jsp';  // about.jsp 페이지로 이동
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>홈페이지</h1>
+    <p>Tomcat에서 여러 페이지를 사용한 예시입니다.</p>
+    <button id="aboutButton">About 페이지로 이동</button>
+</body>
+</html>
+위 예시에서는 #aboutButton 버튼을 클릭하면 about.jsp로 이동하도록 설정했습니다. 이와 비슷하게 다른 페이지로의 이동, 이벤트 처리, 동적 콘텐츠 로딩 등을 할 수 있습니다.
+
+3. 다른 파일들도 설정하기
+JSP 파일 외에도 HTML, CSS, JavaScript 파일 등 다양한 리소스를 Tomcat 서버에서 제공하려면 해당 파일들을 webapps/test 폴더에 넣어야 합니다. 예를 들어, js/main.js와 css/style.css 파일을 만들어서 링크할 수 있습니다.
+
+예시: index.jsp에서 CSS 및 JS 파일 링크하기
+
+jsp
+복사
+편집
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지</title>
+    <link rel="stylesheet" href="css/style.css">  <!-- CSS 파일 링크 -->
+    <script src="js/main.js"></script>  <!-- JS 파일 링크 -->
+</head>
+<body>
+    <h1>홈페이지</h1>
+    <p>Tomcat에서 여러 페이지를 사용한 예시입니다.</p>
+    <button id="aboutButton">About 페이지로 이동</button>
+</body>
+</html>
+위 예시처럼 index.jsp에서 css/style.css와 js/main.js 파일을 불러올 수 있습니다. 이 파일들을 C:/Tomcat/apache-tomcat-10.1.39/webapps/test/js와 C:/Tomcat/apache-tomcat-10.1.39/webapps/test/css 폴더에 배치해야 합니다.
+
+4. 전체 구조
+Tomcat 서버에서 /test 애플리케이션을 사용하기 위한 구조는 대체로 다음과 같습니다:
+
+bash
+복사
+편집
+C:/Tomcat/apache-tomcat-10.1.39/webapps/test/
+  ├── index.jsp          (메인 페이지)
+  ├── about.jsp          (About 페이지)
+  ├── contact.jsp        (Contact 페이지)
+  ├── js/
+  │   └── main.js        (JavaScript 파일)
+  ├── css/
+  │   └── style.css      (CSS 파일)
+  └── images/
+      └── logo.png       (이미지 파일)
+5. URL 접속 예시
+http://localhost:8080/test/index.jsp - 메인 페이지
+
+http://localhost:8080/test/about.jsp - About 페이지
+
+http://localhost:8080/test/contact.jsp - Contact 페이지
+
+http://localhost:8080/test/js/main.js - JavaScript 파일
+
+http://localhost:8080/test/css/style.css - CSS 파일
+
+http://localhost:8080/test/images/logo.png - 이미지 파일
+
+6. server.xml 및 Context 설정 검토
+server.xml에서 설정한 path="/test"는 /test URL 경로로 접근할 수 있도록 해주며, docBase="C:/Tomcat/apache-tomcat-10.1.39/webapps/test"는 실제 파일이 위치한 경로를 지정합니다.
+
+따라서 test 폴더 내의 모든 파일들이 Tomcat에 의해 서비스되고, URL을 통해 접근할 수 있습니다.
+
+결론
+파일을 제대로 배치: test 폴더 내에 JSP, HTML, CSS, JS, 이미지 파일 등을 넣어야 하고, 각 파일은 http://localhost:8080/test/ 경로에서 접근할 수 있습니다.
+
+URL 경로: http://localhost:8080/test/index.jsp처럼 페이지를 접속하고, 다른 페이지로 이동할 때는 링크나 이벤트 처리로 페이지 전환을 구현할 수 있습니다.
+
+jQuery 및 이벤트 처리: 각 페이지에서 jQuery를 사용하여 다른 페이지로 이동하거나 동적인 콘텐츠 로딩을 할 수 있습니다.
+
+이제 여러 파일을 다루는 웹 애플리케이션을 만들 수 있게 되셨습니다! 추가적으로 필요한 기능을 구현하면 됩니다.

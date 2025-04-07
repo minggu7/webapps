@@ -1,0 +1,143 @@
+Tomcat의 역할
+
+Tomcat은 Java 웹 애플리케이션 서버(Apache Tomcat Server) 로, 다음과 같은 역할을 해!
+
+서블릿/ JSP 실행
+
+Java로 개발된 웹 애플리케이션(JSP, Servlet) 을 실행하는 컨테이너 역할.
+
+일반적인 웹 서버(예: Nginx, Apache HTTPD)와 다르게 Java 기반의 동적 웹 페이지(JSP, Servlet)를 처리할 수 있어.
+
+웹 서버 기능 (기본 포트 8080)
+
+HTTP 요청을 받아서 웹 페이지(HTML, CSS, JS, JSP)를 클라이언트(브라우저)에 제공.
+
+http://localhost:8080으로 직접 접근 가능.
+
+리버스 프록시와의 차이점
+
+Nginx처럼 리버스 프록시(reverse proxy) 역할을 하지는 않아.
+
+하지만 Nginx와 연결해서 프론트엔드(Nginx) + 백엔드(Tomcat)로 활용할 수 있어!
+
+실무에서는 Nginx(80포트) → Tomcat(8080포트)로 프록시 설정해서 사용함.
+
+JDK 확인 및 설정
+
+기존에 JDK 8이 설정되어 있었지만, JAVA_HOME을 JDK 21로 변경했음.
+
+Apache Tomcat 설치
+
+apache-tomcat-9.0.102 다운로드 및 압축 해제.
+
+Tomcat 실행
+
+startup.bat 실행 후, 브라우저에서 http://localhost:8080 접속하여 확인.
+
+한글 깨짐 문제 발생
+
+UTF-8 인코딩 설정 후 다시 실행하여 해결.
+
+
+------------------------------------------------------------------------------------------------------------
+위 과정 자세한 설명
+
+1. JDK 확인 및 설정
+기존 JDK 8 확인
+java -version 명령어로 확인해보니 JDK 8이 설치되어 있었음.
+
+bash
+복사
+편집
+C:\Users\kmg23> java -version
+java version "1.8.0_281"
+Java(TM) SE Runtime Environment (build 1.8.0_281-b09)
+Java HotSpot(TM) 64-Bit Server VM (build 25.281-b09, mixed mode)
+JDK 21로 변경하기
+JDK 21 설치
+
+Oracle JDK 21 다운로드에서 JDK 21을 다운로드하여 설치.
+
+환경 변수 설정
+
+JAVA_HOME을 JDK 21 경로로 변경.
+
+bash
+복사
+편집
+C:\Users\kmg23> echo %JAVA_HOME%
+C:\Program Files\Java\jdk-21.0.3
+JAVA_HOME 수정 경로
+경로: C:\Program Files\Java\jdk-21.0.3
+
+환경 변수 JAVA_HOME 설정: C:\Program Files\Java\jdk-21.0.3
+
+Path 변수에도 JAVA_HOME\bin 추가.
+
+2. Apache Tomcat 설치
+Tomcat 다운로드 및 압축 해제
+다운로드 위치: Tomcat 9.0.102 파일을 다운로드.
+
+압축 해제 위치: C:\Users\kmg23\Downloads\apache-tomcat-9.0.102로 압축 해제.
+
+Tomcat 실행
+bin 폴더로 이동
+
+bash
+복사
+편집
+C:\Users\kmg23> cd "C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\bin"
+startup.bat 실행
+
+bash
+복사
+편집
+C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\bin> startup.bat
+출력 내용:
+
+text
+복사
+편집
+Using CATALINA_BASE: "C:\Users\kmg23\Downloads\apache-tomcat-9.0.102"
+Using CATALINA_HOME: "C:\Users\kmg23\Downloads\apache-tomcat-9.0.102"
+Using CATALINA_TMPDIR: "C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\temp"
+Using JRE_HOME: "C:\Program Files\Java\jdk-21.0.3"
+브라우저에서 확인
+URL: http://localhost:8080
+
+정상적으로 Tomcat 기본 페이지가 보였음.
+
+3. 한글 깨짐 문제 해결
+문제 확인
+Tomcat 실행 시 한글이 깨지는 문제가 발생했음.
+
+로그에서 한글이 ???로 표시됨.
+
+해결 방법
+콘솔 문자 인코딩 변경
+
+chcp 65001 명령어로 콘솔 인코딩을 UTF-8로 변경.
+
+bash
+복사
+편집
+C:\Users\kmg23> chcp 65001
+catalina.bat 수정
+
+catalina.bat 파일을 열고, 맨 위에 아래 내용을 추가:
+
+sh
+복사
+편집
+set JAVA_OPTS=-Dfile.encoding=UTF-8
+위치: C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\bin\catalina.bat
+
+Tomcat 재시작
+
+Tomcat 중지 후 재시작:
+
+bash
+복사
+편집
+C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\bin> shutdown.bat
+C:\Users\kmg23\Downloads\apache-tomcat-9.0.102\bin> startup.bat

@@ -1,0 +1,76 @@
+A355-63C5
+
+형이 말한 **"Publish to GitHub"**은 처음에 로컬 저장소 → GitHub에 업로드하는 과정이고, 그 이후엔 commit하고 push만 하면 돼.
+
+자, 차근차근 한 번 정리해볼게!
+
+✅ 처음 설정 (한 번만 하면 됨)
+1. Git 설치 확인
+터미널에 아래 명령어 쳐봐:
+
+bash
+복사
+편집
+git --version
+버전이 나오면 이미 설치된 거고, 안 나오면 Git 설치해야 돼 → https://git-scm.com/downloads
+
+2. VSCode GitHub 계정 연동
+VSCode 오른쪽 아래 또는 왼쪽 메뉴에서 Source Control (소스 제어) 클릭 →
+로그인 안 돼있으면 GitHub 계정 로그인하라고 나올 거야. 따라가면 됨!
+
+3. 프로젝트 폴더에서 Git 초기화
+bash
+복사
+편집
+git init
+VSCode에서도 상단 Source Control → Initialize Repository 클릭하면 됨.
+
+4. .gitignore 만들기 (선택)
+JSP 프로젝트라면 logs, .classpath, .settings, .project, .idea/, *.iml, 이런 것 무시하고 싶을 수도 있어.
+
+bash
+복사
+편집
+touch .gitignore
+예시:
+
+pgsql
+복사
+편집
+*.class
+*.log
+.idea/
+*.iml
+.DS_Store
+5. 처음 GitHub에 올릴 때: Publish to GitHub
+VSCode에서 Source Control 클릭
+
+오른쪽 위 "..." 메뉴 → Publish to GitHub
+
+저장소 이름 정하고, Public/Private 고르면 알아서 GitHub에 업로드됨
+
+✅ 그 다음부터는 루틴
+bash
+복사
+편집
+git add .
+git commit -m "작업 내용"
+git push
+VSCode에서도 오른쪽 위 "✔ Commit" 누르고
+그 다음 "… → Push" 누르거나 그냥 버튼으로 바로 가능함.
+
+⛔ 만약 GitHub랑 연결이 안 돼 있다면
+bash
+복사
+편집
+git remote add origin https://github.com/너의아이디/저장소이름.git
+git branch -M main
+git push -u origin main
+💡 팁: 명령어 안 쓰고도 가능!
+VSCode Source Control 패널에서
+→ 수정사항 → + (add)
+→ ✔ (commit)
+→ … → Push
+
+필요하면 내가 .gitignore 샘플도 만들어줄게.
+혹시 지금 로컬에 저장소 만들어둔 상태야, 아니면 처음부터 시작하려는 거야?

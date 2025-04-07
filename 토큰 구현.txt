@@ -1,0 +1,270 @@
+1단계: JWT 라이브러리 추가하기 (Java용)
+JWT 생성과 검증을 위해 라이브러리 필요
+
+대표적인 Java JWT 라이브러리: jjwt (Java JWT)
+
+💡 Maven 프로젝트라면:
+xml
+복사
+편집
+<dependency>
+  <groupId>io.jsonwebtoken</groupId>
+  <artifactId>jjwt-api</artifactId>
+  <version>0.11.5</version>
+</dependency>
+<dependency>
+  <groupId>io.jsonwebtoken</groupId>
+  <artifactId>jjwt-impl</artifactId>
+  <version>0.11.5</version>
+  <scope>runtime</scope>
+</dependency>
+<dependency>
+  <groupId>io.jsonwebtoken</groupId>
+  <artifactId>jjwt-jackson</artifactId>
+  <version>0.11.5</version>
+  <scope>runtime</scope>
+</dependency>
+💡 JSP 프로젝트는 Maven 안 쓴다면?
+→ 위 라이브러리 3개를 Maven Repository에서 .jar 파일로 받아서 /WEB-INF/lib/ 폴더에 넣어주면 됨.
+
+✅ 2단계: JWT 유틸 클래스 만들기 (JwtUtil.java)
+java
+복사
+편집
+package util;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+
+import java.security.Key;
+import java.util.Date;
+
+public class JwtUtil {
+    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 비밀키 자동 생성
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간
+
+    // ✅ 토큰 생성
+    public static String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(key)
+                .compact();
+    }
+
+    // ✅ 토큰 검증 및 사용자 이름 추출
+    public static String validateToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject(); // username
+        } catch (JwtException e) {
+            return null; // 유효하지 않은 토큰
+        }
+    }
+}
+✅ 3단계: 로그인 성공 시 토큰 발급 → 클라이언트에 전달 (login_process.jsp)
+jsp
+복사
+편집
+<%@ page import="util.JwtUtil" %>
+<%@ page import="java.io.PrintWriter" %>
+...
+if (rs.next()) {
+    String token = JwtUtil.generateToken(username); // JWT 생성
+
+    // 클라이언트에 쿠키로 전달
+    Cookie jwtCookie = new Cookie("jwt", token);
+    jwtCookie.setHttpOnly(true); // JS에서 접근 못하게
+    jwtCookie.setMaxAge(60 * 60); // 1시간
+    jwtCookie.setPath("/");
+    response.addCookie(jwtCookie);
+
+    response.sendRedirect("../home.jsp");
+}
+✅ 4단계: 클라이언트 → 서버 요청 시 JWT 포함
+📌 클라이언트가 Ajax 등으로 요청 시:
+js
+복사
+편집
+fetch('/protected.jsp', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+  }
+})
+📌 또는 쿠키에 담은 경우 → 서버에서 꺼내야 함.
+✅ 5단계: 서버에서 JWT 검증 (authFilter.jsp 같은 파일)
+jsp
+복사
+편집
+<%@ page import="util.JwtUtil" %>
+<%
+    String token = null;
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+        for (Cookie cookie : cookies) {
+            if ("jwt".equals(cookie.getName())) {
+                token = cookie.getValue();
+                break;
+            }
+        }
+    }
+
+    String username = JwtUtil.validateToken(token);
+
+    if (username == null) {
+%>
+        <script>
+            alert("로그인이 필요합니다.");
+            location.href = "../user/login.jsp";
+        </script>
+<%
+        return;
+    }
+%>
+이제 이걸 원하는 JSP 페이지 상단에 include하면 로그인 확인 가능!
+
+jsp
+복사
+편집
+<%@ include file="../common/authFilter.jsp" %>
+✅ 6단계: 로그아웃은?
+jsp
+복사
+편집
+<%
+    Cookie cookie = new Cookie("jwt", "");
+    cookie.setMaxAge(0); // 즉시 만료
+    cookie.setPath("/");
+    response.addCookie(cookie);
+    response.sendRedirect("login.jsp");
+%>
+✅ 전체 흐름 요약
+단계	설명
+1️⃣ 로그인	ID/PW 확인 후 JWT 생성
+2️⃣ 전달	JWT → 쿠키에 담아 클라이언트에 전달
+3️⃣ 인증 요청	클라이언트가 쿠키 or 헤더에 JWT 담아서 요청
+4️⃣ 서버 검증	JWT 서명 및 만료 검증, 사용자 인증 완료
+5️⃣ 로그아웃	쿠키 삭제 또는 클라이언트에서 토큰 제거
+여기까지 이해됐어? 바로 코드 구성으로 넘어갈까? 예를 들어 JwtUtil.java 따로 만들고, login_process.jsp, authFilter.jsp, logout.jsp도 만들어서 실제로 적용해보자.
+준비됐으면 말해줘 🔥
+
+
+--------------------------------------------------세부적으로---------------------------------------------------
+
+1단계: JWT 관련 .jar 파일 다운로드 후 /WEB-INF/lib/에 넣기
+🔧 우리가 필요한 라이브러리 3개:
+jjwt는 세 개의 구성 요소가 필요해.
+
+라이브러리 이름	역할
+jjwt-api	JWT 기본 API
+jjwt-impl	JWT 구현체 (기능 동작 핵심)
+jjwt-jackson	JSON 파싱 (Jackson 기반)
+
+
+✅ 1-1. .jar 다운로드 링크
+아래 링크에서 하나씩 다운로드할 수 있어:
+
+jjwt-api-0.11.5.jar
+
+jjwt-impl-0.11.5.jar
+
+jjwt-jackson-0.11.5.jar
+
+우리는 jjwt-jackson을 사용할 거고, 얘는 내부적으로 Jackson을 사용하는데,
+필수 구성 요소인 databind / core / annotations가 없으면 오류가 남. 아래것들도 다운받아서 넣기 lib에
+
+이거 세 개도 Maven Central에서 .jar 파일로 받아서 WEB-INF/lib/에 넣어줘!
+
+📥 다운로드 링크 다시 정리:
+
+jackson-databind-2.15.2.jar
+
+jackson-core-2.15.2.jar
+
+jackson-annotations-2.15.2.jar
+
+
+
+2단계: 로그인 성공 시 JWT 생성하고, 클라이언트에게 전달하기
+📍 우리가 할 작업 요약:
+로그인 성공 시 JWT를 생성한다.
+
+생성한 JWT를 HTTP 쿠키에 담아서 클라이언트에 전달한다.
+
+좋아, 완전 제대로 된 JWT 인증 구조로 가려는 거네!
+✅ Access Token + Refresh Token 구조에다가
+✅ Refresh Token Rotation (리프레시 토큰 재발급 정책) 까지!
+
+완전 기업용 백엔드 인증 플로우지 🔥
+그럼 어떤 구조로 가야 좋은지, 그리고 토큰 이름은 어떻게 구분하는 게 좋은지 세부적으로 설명해줄게.
+
+✅ 1. JWT 2종 구조 (Access + Refresh)
+구분	내용
+Access Token	사용자의 인증 상태를 나타내는 토큰 (짧은 만료시간, 요청 헤더 또는 쿠키에 사용)
+Refresh Token	Access Token 재발급을 위한 장기 토큰 (보통 DB에 저장, 쿠키 사용 권장)
+✅ 2. 토큰 이름 네이밍 추천
+토큰 종류	쿠키 이름 예시	설명
+Access Token	access_token	사용자 인증 상태 판단용, 모든 요청마다 사용됨
+Refresh Token	refresh_token	Access Token 재발급용, 재발급 요청 시만 사용됨
+이렇게 명확하게 이름을 구분하면 돼.
+이름은 대부분 소문자 + 언더스코어로 많이 쓰고, 보안 강화를 위해 HttpOnly + Secure + SameSite 설정도 해줘야 해 (이건 나중에).
+
+✅ 3. Refresh Token Rotation이란?
+Access Token이 만료되어 재발급을 요청할 때,
+
+기존 Refresh Token은 무효화시키고
+
+새로운 Refresh Token을 재발급하는 방식
+
+→ 즉, 한 번 사용된 Refresh Token은 재사용 불가 (도난 방지용)
+
+이 구조로 가려면 Refresh Token을 서버(DB or 메모리)에 저장해둬야 하고,
+매번 새로운 Refresh Token으로 교체되기 때문에, DB에서 비교 & 갱신이 필요해.
+
+✅ 구조 예시
+text
+복사
+편집
+[Login 시]
+ └ access_token: 15분 유효 → 쿠키에 저장
+ └ refresh_token: 7일 유효 → 쿠키에 저장 + DB 저장
+
+[Access Token 만료되었을 때]
+ └ 클라이언트 → refresh_token 사용해 /refresh 요청
+ └ 서버: refresh_token 유효성 확인 + DB 확인
+ └ 유효하면: 새 access_token + 새 refresh_token 발급
+ └ DB 갱신 (기존 refresh_token → 새로 교체)
+
+[로그아웃 시]
+ └ DB에서 refresh_token 삭제
+ └ 쿠키 삭제
+✅ 지금 우리가 할 작업 정리
+단계	작업 내용
+1	로그인 시 access_token, refresh_token 둘 다 발급해서 쿠키에 저장
+2	Refresh Token은 DB에 저장
+3	추후 /refresh API 구현해서 토큰 재발급 시 Rotation 구조로 구현
+4	로그아웃 시 DB의 Refresh Token 삭제, 쿠키 삭제
+✅ 결론
+이름은: access_token, refresh_token 으로 구분
+
+저장 위치: 쿠키 (HttpOnly) + DB (refresh_token만)
+
+지금은 로그인 시 2개 토큰을 발급해서 쿠키에 저장하는 부분부터 하면 돼
+
+
+1단계: BCrypt 라이브러리 .jar 추가하기
+🔧 필요한 파일:
+bcrypt 라이브러리 다운로드 (jBCrypt)
+
+버전: 0.4 추천
+
+jbcrypt-0.4.jar 다운로드해서 WEB-INF/lib에 넣기
+
+✅ 2단계: 회원가입 시 암호화 저장하도록 수정
+

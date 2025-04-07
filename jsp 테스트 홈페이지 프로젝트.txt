@@ -1,0 +1,37 @@
+JSP 스타일 구성 방식 정리
+1. 인라인 스타일 (X)
+<div style="color: red;"> 이런 건 지양.
+
+보기 힘들고, 재사용도 불편.
+
+2. 외부 CSS 파일 (O)
+style.css 파일 만들어서 <link rel="stylesheet" href="css/style.css"> 형식으로 <head>에 포함.
+
+JSP의 가장 일반적인 방식.
+
+3. Tailwind CSS 사용 가능?
+가능은 한데, 설정이 조금 필요해:
+
+JSP는 기본적으로 빌드 없이 바로 렌더링되기 때문에, Tailwind의 빌드 과정을 따로 돌려야 해.
+
+간단하게 쓰려면 CDN 방식으로 링크하는 방법이 있어:
+
+html
+복사
+편집
+<!-- head에 추가 -->
+<script src="https://cdn.tailwindcss.com"></script>
+이렇게 하면 Tailwind를 JSP에서 바로 쓸 수 있어.
+
+4. jQuery
+jQuery도 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>로 head에 넣어서 사용하면 됨.
+
+게시판에서 AJAX나 동적 UI 처리할 때 유용.
+
+🔧 이제 어떻게 할까?
+Step 1. home.jsp 틀부터 다시 깔끔하게 만들자
+Tailwind CDN 포함
+
+jQuery 포함
+
+전체 구조만 뼈대 잡기 (스타일은 나중에)

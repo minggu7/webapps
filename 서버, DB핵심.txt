@@ -1,0 +1,47 @@
+✅ PreparedStatement pstmt = null; 왜 필요해?
+👉 그냥 쿼리문을 한 줄로 실행할 수도 있잖아?
+
+하지만:
+
+보안
+Statement로 그냥 "SELECT * FROM user WHERE username = '" + input + "'" 식으로 하면
+→ SQL Injection 공격에 취약해.
+예: ' OR 1=1 -- 이런 식으로 해킹 가능.
+
+PreparedStatement는 ? 자리에 값을 안전하게 바인딩하기 때문에
+→ SQL 주입 방어가 자동으로 돼.
+
+성능
+자주 쓰는 SQL 문장을 DB가 미리 컴파일해 놓는다.
+→ 매번 새로 분석하지 않아서 빠름. 특히 반복적인 쿼리에서 이득 큼.
+
+코드 가독성 + 유지보수
+동적 쿼리 만들 때 훨씬 깔끔하고 유지보수 쉬움.
+
+✅ ResultSet rs = null; 왜 따로 저장해?
+쿼리문을 실행하면 그 결과가 바로 나오잖아? 근데 왜 저장하냐면:
+
+결과를 반복적으로 써야 하니까! 예: while(rs.next()) { ... }
+→ 결과가 여러 줄일 수도 있으니까 하나하나 순회해서 가져올 수 있어야 해.
+
+데이터 추출을 직접 해야 함 rs.getString("username") 이런 식으로 결과에서 필드 값을 직접 꺼내와야 하거든.
+
+실행 후에도 조회 상태를 유지 결과를 저장하지 않으면, 결과를 받아온 다음 바로 끝나버려서
+값을 쓸 수가 없음.
+
+✅ 그럼 왜 null로 먼저 선언해?
+아주 단순한 이유야:
+
+try 블록에서 만든 변수는 try 블록 밖(= finally 블록)에서 못 써.
+
+그래서 위에 먼저 선언해두고, 나중에 finally 블록에서 닫을 수 있도록 하는 거지.
+
+jsp
+복사
+편집
+try {
+    pstmt = conn.prepareStatement(...);
+    rs = pstmt.executeQuery();
+} finally {
+    rs.close(); // 이렇게 닫으려면 위에서 선언해야 가능!
+}

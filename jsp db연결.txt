@@ -1,0 +1,123 @@
+1단계: MySQL JDBC 드라이버 추가
+💡 왜 필요해?
+JSP(Java)에서 MySQL에 접속하려면 JDBC 드라이버라는 중간 연결 도구가 필요해.
+
+🔧 해야 할 일
+아래 링크에서 MySQL JDBC 드라이버(JAR 파일)를 다운로드
+👉 https://dev.mysql.com/downloads/connector/j/
+
+다운로드한 .jar 파일을 다음 경로에 복사해 넣어:
+
+vbnet
+복사
+편집
+C:\Tomcat\apache-tomcat-10.1.39\lib
+또는 프로젝트별로 관리하려면:
+
+vbnet
+복사
+편집
+C:\Tomcat\apache-tomcat-10.1.39\webapps\test\WEB-INF\lib
+📌 추천: Tomcat 전체에서 쓰려면 Tomcat\lib,
+특정 프로젝트(test)만 쓸 거면 test\WEB-INF\lib에 넣는 게 좋아.
+
+MySQL JDBC 드라이버 다운로드 (Connector/J)
+1️⃣ 아래 링크로 이동:
+👉 https://dev.mysql.com/downloads/connector/j/
+
+2️⃣ 페이지에서 이렇게 해:
+페이지 중간쯤 내려보면
+“Select Operating System” 이라고 써 있는 부분이 보여
+
+여기서 그냥 기본값 “Platform Independent” 그대로 두면 돼
+
+아래로 좀 더 내리면 다음 두 가지가 보여:
+
+파일명	설명
+ZIP Archive	압축파일(zip), 우리가 이거 받을 거야
+TAR Archive	리눅스용 압축파일 (우린 필요 없어)
+✅ [Download] 버튼 있는 쪽의 “ZIP Archive” 클릭해!
+
+3️⃣ 로그인 페이지가 나옴
+MySQL은 회원가입을 유도하지만,
+
+밑에 작은 글씨로 "No thanks, just start my download." 라고 있어
+👉 그걸 클릭하면 바로 다운로드 시작됨!
+
+4️⃣ 다운로드된 ZIP 파일 압축 풀기
+압축 풀면 폴더 안에 이런 파일들이 있음:
+
+markdown
+복사
+편집
+mysql-connector-j-8.3.0
+│
+├── README
+├── CHANGES
+├── LICENSE
+└── **mysql-connector-j-8.3.0.jar** ← 바로 이 파일이 중요함!
+5️⃣ .jar 파일을 복사해서 프로젝트에 추가
+이 파일을 복사해서 붙여넣기:
+
+전체 Tomcat에서 쓰고 싶으면 →
+C:\Tomcat\apache-tomcat-10.1.39\lib
+
+특정 프로젝트(test)만 쓰고 싶으면 →
+C:\Tomcat\apache-tomcat-10.1.39\webapps\test\WEB-INF\lib
+
+MySQL DB와 Java(JSP)가 통신할 수 있게 해주는 "JDBC 드라이버" 역할이야.
+
+✅ 2단계: MySQL에서 DB, 계정 준비
+이제 MySQL 워크벤치에서 아래처럼 세팅해줘:
+
+데이터베이스 생성
+
+sql
+복사
+편집
+CREATE DATABASE testdb;
+사용자 생성 (옵션)
+
+sql
+복사
+편집
+CREATE USER 'jspuser'@'localhost' IDENTIFIED BY 'jsp1234';
+GRANT ALL PRIVILEGES ON testdb.* TO 'jspuser'@'localhost';
+FLUSH PRIVILEGES;
+💡 이미 있는 root 계정 써도 되지만, 보안이나 테스트 구분 위해 별도 계정 추천!
+
+-- 1. 사용자 생성
+CREATE USER 'kmg2388'@'localhost' IDENTIFIED BY '2388';
+
+-- 2. jsptestdb 데이터베이스에 대한 모든 권한 부여
+GRANT ALL PRIVILEGES ON jsptestdb.* TO 'kmg2388'@'localhost';
+
+-- 3. 권한 적용
+FLUSH PRIVILEGES;
+
+✅ 3단계 이후 미리보기 (나중에 할 거야)
+JSP에서 JDBC로 연결하는 코드 작성
+
+커넥션 연결 확인
+
+실제 데이터 SELECT, INSERT 테스트
+
+🛠 지금 할 일 요약:
+ MySQL Connector JAR 다운로드 ✅
+
+ Tomcat/lib 또는 test/WEB-INF/lib 폴더에 JAR 넣기 ✅
+
+ 워크벤치에서 testdb DB 만들기 ✅
+
+ 사용자 계정(jspuser 등) 만들기 ✅
+
+하지만 아래와 같은 경우엔 재시작이 필요할 수 있어:
+web.xml 같은 설정 파일을 수정했을 때
+
+WEB-INF/lib에 JAR 파일을 새로 추가했을 때 (ex. MySQL 드라이버)
+
+자바 클래스 파일이 바뀌었을 때 (Servlet 등 직접 작성한 .class 파일 등)
+
+WEB-INF는 JSP 웹 프로젝트의 설정과 중요한 파일을 넣는 전용 폴더야.
+외부에서 직접 접근은 안 되지만, 서버에서는 읽을 수 있는 곳이지.
+

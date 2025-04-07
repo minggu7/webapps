@@ -1,0 +1,98 @@
+1단계: 기본 폴더 및 파일 구조 만들기
+먼저, JSP 프로젝트의 기본적인 폴더 구조를 만들어야 해요. 아래와 같이 폴더와 파일을 만들어 주세요:
+
+pgsql
+복사
+편집
+jsp_project/
+│
+├── WEB-INF/
+│   └── web.xml
+│
+├── index.jsp
+WEB-INF/: JSP와 Servlet 기반의 웹 애플리케이션에서 필수적인 폴더로, 프로젝트 설정과 관련된 파일을 저장합니다. 여기에는 web.xml 파일이 들어갑니다.
+
+index.jsp: 기본적인 JSP 페이지를 만듭니다. 이 파일은 브라우저에서 접속할 때 기본적으로 표시되는 페이지가 됩니다.
+
+2단계: web.xml 파일 만들기
+WEB-INF/ 폴더 안에 web.xml 파일을 만들어야 해요. 이 파일은 서블릿 매핑이나 JSP 파일 경로를 설정하는 역할을 합니다.
+
+WEB-INF/web.xml 파일을 생성하고, 다음과 같은 내용을 입력하세요:
+
+xml
+복사
+편집
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+             http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+    
+    <display-name>My JSP Project</display-name>
+    
+    <!-- 서블릿 설정 (필요에 따라 추가 가능) -->
+    <!-- <servlet> ... </servlet> -->
+    
+</web-app>
+web.xml 파일은 기본적으로 display-name을 지정하고, 서블릿을 설정할 수 있는 구조로 되어 있습니다. 서블릿은 나중에 추가할 수 있으니 지금은 간단히 display-name만 추가해 주세요.
+
+3단계: index.jsp 만들기
+index.jsp 파일은 프로젝트의 기본 JSP 페이지로, HTML과 JSP 코드를 섞어서 작성할 수 있습니다.
+
+index.jsp 파일을 프로젝트 루트에 생성하고, 다음과 같이 간단한 HTML과 JSP 코드를 입력해 주세요:
+
+jsp
+복사
+편집
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSP 프로젝트</title>
+</head>
+<body>
+    <h1>JSP 테스트 페이지</h1>
+    <p>현재 시간: <%= new java.util.Date() %></p>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('p').css('color', 'blue');
+        });
+    </script>
+</body>
+</html>
+이 코드는:
+
+h1 태그로 **"JSP 테스트 페이지"**라는 제목을 표시하고,
+
+p 태그로 현재 시간을 JSP 코드로 출력합니다.
+
+jQuery를 포함하여, 페이지가 로드될 때 p 태그의 색상을 파란색으로 변경합니다.
+
+4단계: Tomcat 서버로 테스트하기
+Tomcat 서버가 실행 중이라면, index.jsp 페이지를 Tomcat의 webapps 폴더에 복사해야 해요.
+
+프로젝트 폴더를 webapps 아래에 복사하거나, Tomcat 서버를 jsp_project 폴더와 연결하여 테스트할 수 있습니다.
+
+브라우저에서 http://localhost:8080/jsp_project/index.jsp를 입력하여 테스트 페이지를 확인할 수 있습니다.
+
+요약
+VS Code에서 프로젝트 폴더를 열고,
+
+폴더 구조와 web.xml, index.jsp 파일을 만들었습니다.
+
+Tomcat 서버에서 실행하고, 브라우저로 확인해 보세요.
+
+이제 JSP 페이지가 잘 동작하는지 확인해 볼 차례입니다!
+
+
+
+TOMCAT SERVERS의 구조는 이렇다.
+ <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
+        <Context path="/test" docBase="C:/Tomcat/apache-tomcat-10.1.39/webapps/test" />
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b"/>
+      </Host>
+이면 appBASE가 기초가 되고 해당 디렉토리에서 path 즉, /test 폴더 경로 안에서 url에 일치하는 파일을 찾는다.
+예를들어 webapps/test/test.jsp 면 url은 http://localhost:8080/test/test.jsp 가 된다.

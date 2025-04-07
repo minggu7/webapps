@@ -1,0 +1,111 @@
+1. VS Code 설치 및 필수 확장 프로그램 설치
+1.1. VS Code 설치
+
+VS Code는 개발을 위한 강력한 코드 편집기입니다. VS Code 공식 사이트에서 설치할 수 있습니다.
+
+1.2. 필수 확장 프로그램 설치
+
+JSP 파일을 제대로 작성하고 실행하기 위해서는 필요한 확장 프로그램을 설치해야 합니다. 여기에는 JSP 파일을 지원하는 JSP와 Java 코드 디버깅을 위한 Debugger for Java, 그리고 Tomcat과의 연동을 위한 Tomcat for Visual Studio Code 확장 프로그램이 포함됩니다.
+
+JSP 확장 프로그램:
+
+JSP 확장 프로그램을 설치하면, JSP 파일에 대한 문법 강조 및 자동 완성 기능을 제공받을 수 있습니다.
+
+Debugger for Java:
+
+Java 코드의 디버깅 기능을 제공하는 확장 프로그램입니다. JSP 코드에 포함된 Java 코드도 디버깅할 수 있습니다.
+
+Tomcat for Visual Studio Code:
+
+이 확장 프로그램은 Tomcat 서버를 VS Code에서 직접 제어하고, 서버를 시작하고 중지할 수 있도록 도와줍니다.
+
+2. Tomcat 설치
+2.1. Tomcat 다운로드 및 설치
+
+Tomcat은 Java 기반의 웹 애플리케이션 서버입니다. Tomcat 다운로드 페이지에서 Tomcat 10 버전을 다운로드합니다.
+
+다운로드 후, 압축을 풀고 원하는 디렉토리에 설치합니다.
+
+예: C:\Tomcat\apache-tomcat-10.1.39
+
+2.2. Tomcat 환경 설정
+
+Tomcat의 server.xml 파일에서 <Host>와 <Context> 설정을 통해 웹 애플리케이션을 배포할 경로와 설정을 할 수 있습니다.
+
+3. VS Code에서 Tomcat 설정
+3.1. Tomcat 서버 설정
+
+VS Code에서 Tomcat 확장 프로그램을 설치한 후, Tomcat 서버를 설정할 수 있습니다.
+
+VS Code의 Tomcat 아이콘을 클릭하여 Tomcat 서버의 경로를 설정하고, Tomcat을 시작할 수 있습니다.
+
+3.2. Tomcat 서버에 웹 애플리케이션 배포
+
+C:\Tomcat\apache-tomcat-10.1.39\webapps 폴더에 웹 애플리케이션을 배치하면 Tomcat이 이를 자동으로 배포합니다.
+
+예를 들어, test라는 디렉토리를 만들어 test.jsp 파일을 넣으면, http://localhost:8080/test/test.jsp에서 접근할 수 있습니다.
+
+4. 웹 애플리케이션 배포 및 테스트
+4.1. test.jsp 파일 작성
+
+test.jsp 파일을 C:\Tomcat\apache-tomcat-10.1.39\webapps\test 경로에 배치합니다.
+
+기본적인 JSP 파일 작성 예:
+
+jsp
+복사
+편집
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test JSP</title>
+</head>
+<body>
+    <h1>테스트 JSP 페이지</h1>
+    <p>Tomcat에서 정상적으로 작동합니다!</p>
+</body>
+</html>
+4.2. Tomcat 서버 실행
+
+VS Code에서 Tomcat 서버를 실행하고, http://localhost:8080/test/test.jsp URL에 접속하면 test.jsp 페이지를 확인할 수 있습니다.
+
+5. URL 경로 수정 (단축 URL)
+기본적으로 Tomcat은 http://localhost:8080/test/test.jsp와 같은 경로로 접근합니다.
+
+만약 http://localhost:8080/test.jsp와 같이 접근하고 싶다면, server.xml 파일에서 path="/test" 대신 path="/"로 수정하거나, context.xml 파일에서 docBase와 path 설정을 조정해야 합니다.
+
+6. 문제 해결 및 설정 확인
+6.1. 404 에러 해결
+
+URL에 접속했을 때 404 – Not Found 에러가 발생하면, 배포 경로가 올바른지, 파일 경로가 정확한지, Tomcat 서버가 제대로 실행되고 있는지 확인해야 합니다.
+
+6.2. server.xml 및 context.xml 설정 확인
+
+server.xml 파일에서 <Host>와 <Context> 설정을 통해 애플리케이션 경로와 docBase 설정을 확인합니다.
+
+6.3. Tomcat 서버 로그 확인
+
+Tomcat 서버에서 로그를 확인하여 문제 발생 원인을 추적합니다. 서버 로그에 오류 메시지가 기록됩니다.
+
+핵심 정리:
+VS Code 설치 및 확장 프로그램 설치: JSP, Java 디버거, Tomcat 연동
+
+Tomcat 설치 및 설정: Tomcat 서버 설치 후 웹 애플리케이션 배포 경로 설정
+
+웹 애플리케이션 배포 및 테스트: JSP 파일을 Tomcat의 webapps 폴더에 배치하고 URL에서 접근
+
+URL 경로 수정: server.xml 및 context.xml 파일을 수정하여 URL 경로 변경
+
+이렇게 진행하면서 Tomcat 서버에서 JSP 파일을 테스트하고, 필요에 따라 경로 및 설정을 수정하며, 문제를 해결하는 과정이었습니다.
+
+TOMCAT SERVERS의 구조는 이렇다.
+ <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
+        <Context path="/test" docBase="C:/Tomcat/apache-tomcat-10.1.39/webapps/test" />
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b"/>
+      </Host>
+이면 appBASE가 기초가 되고 해당 디렉토리에서 path 즉, /test 폴더 경로 안에서 url에 일치하는 파일을 찾는다.
+예를들어 webapps/test/test.jsp 면 url은 http://localhost:8080/test/test.jsp 가 된다.
+
+
+
