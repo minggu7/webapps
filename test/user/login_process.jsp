@@ -2,6 +2,7 @@
 <%@ page import="javax.servlet.http.*, javax.servlet.*" %> <!-- HTTP 요청/응답, 쿠키 등 웹 관련 클래스 -->
 <%@ page import="io.jsonwebtoken.*" %> <!-- JWT 라이브러리: 토큰 생성/검증 -->
 <%@ page import="java.util.Date" %> <!-- 날짜/시간 처리용 -->
+<%@ page import="org.mindrot.jbcrypt.BCrypt" %> <!-- BCrypt 암호화용 -->
 <%@ page contentType="text/html; charset=UTF-8" language="java" %> <!-- 페이지 인코딩 설정 -->
 
 <%@ include file="../common/dbConfig.jsp" %> <!-- 공통 DB 설정 포함 -->
@@ -19,77 +20,115 @@
         Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 드라이버 로드
         conn = DriverManager.getConnection(url, dbUser, dbPass); // DB 연결
 
-        // 🔐 로그인 정보 확인 (※ 평문 비밀번호로 비교 중. 추후 BCrypt 적용 예정)
-        String sql = "SELECT * FROM user WHERE username = ? AND password = ?";
+        // 🔐 비밀번호는 암호화된 값과 비교해야 함
+        String sql = "SELECT * FROM user WHERE username = ?";
         pstmt = conn.prepareStatement(sql); // SQL 준비
-        pstmt.setString(1, username); // 첫 번째 ?에 사용자명 넣기
-        pstmt.setString(2, password); // 두 번째 ?에 비밀번호 넣기
+        pstmt.setString(1, username); // 사용자명 바인딩
         rs = pstmt.executeQuery(); // 쿼리 실행
 
-        if (rs.next()) { // ✅ 로그인 성공 시
-            String secretKey = "MySuperSecretKey1234567890"; // 토큰 서명용 비밀키
+        if (rs.next()) { // ✅ 사용자 존재
+            String dbHashedPw = rs.getString("password"); // DB에 저장된 암호화된 비밀번호
 
-            long nowMillis = System.currentTimeMillis(); // 현재 시간 (밀리초 단위)
-            Date now = new Date(nowMillis); // Date 타입으로 변환
+            if (BCrypt.checkpw(password, dbHashedPw)) { // ✅ 비밀번호 일치 시
+                String secretKey = "ThisIsASecretKeyThatIsLongEnough123456!"; // 토큰 서명용 비밀키
 
-            // ✅ Access Token (1시간 유효)
-            Date accessExp = new Date(nowMillis + 1000 * 60 * 60); // 현재 + 1시간
-            String accessToken = Jwts.builder()
-                .setSubject(username) // 토큰 주제: 사용자 이름
-                .setIssuedAt(now) // 토큰 발급 시각
-                .setExpiration(accessExp) // 토큰 만료 시각
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes("UTF-8")) // HS256 알고리즘으로 서명
-                .compact(); // JWT 문자열 생성
+                long nowMillis = System.currentTimeMillis(); // 현재 시간 (밀리초 단위)
+                Date now = new Date(nowMillis); // Date 타입으로 변환
 
-            // ✅ Refresh Token (7일 유효)
-            Date refreshExp = new Date(nowMillis + 1000L * 60 * 60 * 24 * 7); // 현재 + 7일
-            String refreshToken = Jwts.builder()
-                .setSubject(username) // 주제 동일
-                .setIssuedAt(now) // 발급 시각
-                .setExpiration(refreshExp) // 만료 시각
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes("UTF-8")) // 서명
-                .compact(); // JWT 생성
+                // ✅ Access Token (1시간 유효)
+                Date accessExp = new Date(nowMillis + 1000 * 60 * 60); // 현재 + 1시간
+                String accessToken = Jwts.builder()
+                    .setSubject(username) // 토큰 주제: 사용자 이름
+                    .setIssuedAt(now) // 토큰 발급 시각
+                    .setExpiration(accessExp) // 토큰 만료 시각
+                    .signWith(SignatureAlgorithm.HS256, secretKey.getBytes("UTF-8")) // 서명
+                    .compact(); // JWT 문자열 생성
 
-            // ✅ Access Token → 쿠키에 저장
-            Cookie accessCookie = new Cookie("access_token", accessToken); // 쿠키 이름 access_token
-            accessCookie.setHttpOnly(true); // JavaScript 접근 금지
-            accessCookie.setPath("/"); // 사이트 전체에서 사용 가능
-            accessCookie.setMaxAge(60 * 60); // 1시간 유지
-            response.addCookie(accessCookie); // 응답에 쿠키 추가
+                // ✅ Refresh Token (7일 유효)
+                Date refreshExp = new Date(nowMillis + 1000L * 60 * 60 * 24 * 7); // 현재 + 7일
+                String refreshToken = Jwts.builder()
+                    .setSubject(username) // 주제 동일
+                    .setIssuedAt(now) // 발급 시각
+                    .setExpiration(refreshExp) // 만료 시각
+                    .signWith(SignatureAlgorithm.HS256, secretKey.getBytes("UTF-8")) // 서명
+                    .compact(); // JWT 생성
 
-            // ✅ Refresh Token → 쿠키에 저장
-            Cookie refreshCookie = new Cookie("refresh_token", refreshToken); // 쿠키 이름 refresh_token
-            refreshCookie.setHttpOnly(true); // 보안 설정
-            refreshCookie.setPath("/"); // 전체 경로 사용
-            refreshCookie.setMaxAge(60 * 60 * 24 * 7); // 7일 유지
-            response.addCookie(refreshCookie); // 응답에 추가
+                // ✅ Access Token → 쿠키에 저장
+                Cookie accessCookie = new Cookie("access_token", accessToken);
+                accessCookie.setHttpOnly(true);
+                accessCookie.setPath("/");
+                accessCookie.setMaxAge(60 * 60); // 1시간
+                response.addCookie(accessCookie);
 
-            // ✅ Refresh Token → DB에 저장 (나중에 검증/로테이션용)
-            String updateSql = "UPDATE user SET refresh_token = ? WHERE username = ?";
-            pstmt = conn.prepareStatement(updateSql); // 새 쿼리 준비
-            pstmt.setString(1, refreshToken); // 첫 번째 ?에 refresh token
-            pstmt.setString(2, username); // 두 번째 ?에 사용자명
-            pstmt.executeUpdate(); // DB 업데이트
+                // ✅ Refresh Token → 쿠키에 저장
+                Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+                refreshCookie.setHttpOnly(true);
+                refreshCookie.setPath("/");
+                refreshCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
+                response.addCookie(refreshCookie);
 
-            response.sendRedirect("../home.jsp"); // 홈 화면으로 리다이렉트
+                // ✅ Refresh Token → DB에 저장
+                // 먼저 기존에 username으로 등록된 토큰이 있는지 확인
+                String checkSql = "SELECT COUNT(*) FROM refresh_token WHERE username = ?";
+                pstmt.close();
+                pstmt = conn.prepareStatement(checkSql);
+                pstmt.setString(1, username);
+                rs = pstmt.executeQuery();
+
+                int count = 0;
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+                rs.close();
+                pstmt.close();
+
+                if (count > 0) {
+                    // 이미 존재하면 업데이트
+                    String updateSql = "UPDATE refresh_token SET token = ?, is_logged_in = ?, updated_at = NOW(), last_login = NOW() WHERE username = ?";
+                    pstmt = conn.prepareStatement(updateSql);
+                    pstmt.setString(1, refreshToken);
+                    pstmt.setBoolean(2, true);
+                    pstmt.setString(3, username);
+                } else {
+                    // 없으면 삽입
+                    String insertSql = "INSERT INTO refresh_token (username, token, is_logged_in, created_at, updated_at, last_login) VALUES (?, ?, ?, NOW(), NOW(), NOW())";
+                    pstmt = conn.prepareStatement(insertSql);
+                    pstmt.setString(1, username);
+                    pstmt.setString(2, refreshToken);
+                    pstmt.setBoolean(3, true);
+                }
+
+                pstmt.executeUpdate();
+                pstmt.close();
+
+                response.sendRedirect("../home.jsp"); // 홈으로 이동
+
+            } else {
+%>
+                <!-- ❌ 비밀번호 불일치 -->
+                <script>
+                    alert("❌ 아이디 또는 비밀번호가 잘못되었습니다.");
+                    history.back();
+                </script>
+<%
+            }
 
         } else {
 %>
-            <!-- ❌ 로그인 실패 -->
+            <!-- ❌ 아이디 없음 -->
             <script>
-                alert("❌ 아이디 또는 비밀번호가 잘못되었습니다.");
-                history.back(); // 이전 페이지로
+                alert("❌ 존재하지 않는 계정입니다.");
+                history.back();
             </script>
 <%
         }
 
     } catch (Exception e) {
-        e.printStackTrace(); // 에러 출력
+        e.printStackTrace(); // 콘솔 출력용 로그
 %>
-        <p>DB 오류 발생: <%= e.getMessage() %></p> <!-- 사용자에게 오류 메시지 출력 -->
+        <p>⚠️ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
 <%
     } finally {
-        // ✅ 자원 해제
         try { if (rs != null) rs.close(); } catch (Exception e) {}
         try { if (pstmt != null) pstmt.close(); } catch (Exception e) {}
         try { if (conn != null) conn.close(); } catch (Exception e) {}
