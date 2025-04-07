@@ -5,6 +5,7 @@
 <body>
 <%
     // 📌 DB 연결을 위한 정보 (DB URL, 사용자명, 비밀번호)
+    
     String url = "jdbc:mysql://localhost:3306/jsptestdb?serverTimezone=Asia/Seoul"; // DB URL 및 timezone 설정
     String user = "kmg2388";       // MySQL 사용자 이름
     String password = "2388";      // MySQL 사용자 비밀번호
