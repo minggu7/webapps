@@ -7,7 +7,7 @@
 
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ page import="com.auth.JwtUtil" %>
-<%@ page import="javax.servlet.http.Cookie" %>
+<%@ page import="jakarta.servlet.http.Cookie" %>
 <%@ page import="java.util.Optional" %>
 <%
     String accessToken = null;
@@ -17,9 +17,9 @@
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
         for (Cookie cookie : cookies) {
-            if ("accessToken".equals(cookie.getName())) {
+            if ("access_token".equals(cookie.getName())) {
                 accessToken = cookie.getValue();
-            } else if ("refreshToken".equals(cookie.getName())) {
+            } else if ("refresh_token".equals(cookie.getName())) {
                 refreshToken = cookie.getValue();
             }
         }
@@ -35,7 +35,7 @@
             newAccessCookie.setPath("/");                // 쿠키가 모든 경로에서 사용 가능하도록 설정
             newAccessCookie.setHttpOnly(true);           // JavaScript에서 쿠키를 읽을 수 없도록 설정
             newAccessCookie.setSecure(true);             // HTTPS에서만 쿠키가 전송되도록 설정
-            newAccessCookie.setSameSite("Strict");       // 타 사이트에서 쿠키 전송을 막음
+            //newAccessCookie.setSameSite("Strict");       // 타 사이트에서 쿠키 전송을 막음
             response.addCookie(newAccessCookie);         // 응답에 쿠키 추가
     isAuthenticated = true;
         }
